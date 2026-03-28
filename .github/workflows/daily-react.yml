@@ -1,17 +1,22 @@
 name: Daily React Component
 
+# Schedule workflow to run daily at midnight UTC
 on:
   schedule:
-    - cron: '0 0 * * *'  # daily at midnight UTC
-  workflow_dispatch:
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # Allows manual runs
 
 jobs:
   create-daily-component:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Opt into Node 24
 
     steps:
+      # Step 1: Checkout the repo
       - uses: actions/checkout@v3
 
+      # Step 2: Create a new React component file
       - name: Create Daily React Component
         run: |
           mkdir -p components
@@ -21,9 +26,10 @@ jobs:
           echo "Daily React component created on $(date)" >> README.md
           git add README.md
 
+      # Step 3: Commit and push changes using GitHub token
       - name: Commit and Push Changes
         run: |
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
           git commit -m "Daily React component $(date)" || echo "No changes to commit"
-          git push
+          git push origin HEAD:main
